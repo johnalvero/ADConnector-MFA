@@ -1,4 +1,4 @@
-## ADConnector-MFA
+# ADConnector-MFA
 
 ## NTP
 ```
@@ -23,7 +23,7 @@ EOF
 systemctl start ntpd
 ```
 
-### SELinux
+## SELinux
 ```
 yum install policycoreutils-python -y
 semanage fcontext -a -t httpd_sys_content_t "/etc/linotp2(/.*)?"
@@ -34,7 +34,7 @@ setsebool -P httpd_can_connect_ldap on
 ```
 
 
-### Installing LinOTP
+## Installing LinOTP
 ```
 yum localinstall http://linotp.org/rpm/el7/linotp/x86_64/Packages/LinOTP_repos-1.1-1.el7.x86_64.rpm
 yum install -y epel-release
@@ -79,17 +79,17 @@ https://<ip>/manage
 Username: admin
 ```
 
-### Configuring LinOTP
+## Configuring LinOTP
 
-# Users
+### Users
 1. Setup your AD/LDAP UserIdResolver
 2. The previous step will automatically prompt you to create the default realm
 You should now be able to see your users from the User View
 
-# Policies
+### Policies
 
-### Installing Freeradius
+## Installing Freeradius
 
-### Configuring FreeRadius
+## Configuring FreeRadius
 
-### Testing Radius Authentication (OTP)
+## Testing Radius Authentication (OTP)
