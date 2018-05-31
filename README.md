@@ -75,7 +75,7 @@ firewall-cmd --reload
 htdigest /etc/linotp2/admins "LinOTP2 admin area" admin
 
 # Fix LinOTP bug @ https://github.com/LinOTP/LinOTP/issues/85
-```
+
 vi /usr/lib/python2.7/site-packages/linotp/lib/userservice.py
 
 #try to get (local) selfservice
@@ -91,8 +91,6 @@ session = request.params.get('session', 'no_session')
 #fix
 session = session.replace("\\075", "=")
 #fix
-```
-
 
 # navigate to admin portal
 https://<ip>/manage
