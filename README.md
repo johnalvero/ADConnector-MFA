@@ -79,8 +79,14 @@ https://<ip>/manage
 Username: admin
 ```
 
-
 ### Configuring LinOTP
+
+# Users
+1. Setup your AD/LDAP UserIdResolver
+2. The previous step will automatically prompt you to create the default realm
+You should now be able to see your users from the User View
+
+# Policies
 
 ### Installing Freeradius
 
