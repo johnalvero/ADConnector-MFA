@@ -1,10 +1,9 @@
 ## ADConnector-MFA
 
 ## NTP
-
-1. asfasd
-2. asgfas
-4. safasf
+```
+yum install -y ntp
+```
 
 
 ### Installing LinOTP
