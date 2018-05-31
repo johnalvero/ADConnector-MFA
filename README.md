@@ -100,7 +100,7 @@ Adjust the policies as per business need.
 
 ### Assign a token to test user
 
- 1. Navigate to '''https://<ip>/'''
+ 1. Navigate to `https://<ip>/`
  2. Use your AD username & password to authenticate
  3. In the Enroll TOTP token tab, choose the following
 '''
