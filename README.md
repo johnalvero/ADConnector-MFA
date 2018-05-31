@@ -74,6 +74,26 @@ firewall-cmd --reload
 # change the admin password
 htdigest /etc/linotp2/admins "LinOTP2 admin area" admin
 
+# Fix LinOTP bug @ https://github.com/LinOTP/LinOTP/issues/85
+```
+vi /usr/lib/python2.7/site-packages/linotp/lib/userservice.py
+
+# try to get (local) selfservice
+# if none is present fall back to possible
+# userauthcookie (cookie for remote self service)
+
+cookie = request.cookies.get(
+    'user_selfservice', request.cookies.get(
+        'userauthcookie', 'no_auth_cookie'))
+
+session = request.params.get('session', 'no_session')
+
+#fix
+session = session.replace("\\075", "=")
+#fix
+```
+
+
 # navigate to admin portal
 https://<ip>/manage
 Username: admin
@@ -105,7 +125,7 @@ Adjust the policies as per business need.
  3. In the Enroll TOTP token tab, choose the following
 ```
 Generate Random Seed
- Google Authenticator compliant
+Google Authenticator compliant
 ```
  4. Click enroll TOTP token
  5. Scan the QR code using Google Authenticator in your mobile phone
