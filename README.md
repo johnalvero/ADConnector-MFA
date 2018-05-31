@@ -36,6 +36,8 @@ setsebool -P httpd_can_connect_ldap on
 
 ## Installing LinOTP
 ```
+yum install git -y
+https://github.com/johnalvero/ADConnector-MFA.git /usr/local
 yum localinstall http://linotp.org/rpm/el7/linotp/x86_64/Packages/LinOTP_repos-1.1-1.el7.x86_64.rpm
 yum install -y epel-release
 
@@ -192,5 +194,8 @@ SSL_CHECK=False
 EOF
 
 rm /etc/raddb/sites-enabled/inner-tunnel 
+
+cp xxx /etc/raddb/sites-available/linotp
+ln -s /etc/raddb/sites-available/linotp /etc/raddb/sites-available/linotp
 ```
 ## Testing Radius Authentication (OTP)
