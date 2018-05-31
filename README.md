@@ -149,6 +149,10 @@ If this is not the output you see, go back and review the installation steps.
 ```
 
 ## Installing Freeradius
+```
+yum  install -t yum install freeradius freeradius-perl
+
+```
 
 ## Configuring FreeRadius
 
