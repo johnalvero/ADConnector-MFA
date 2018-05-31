@@ -71,10 +71,12 @@ firewall-cmd --zone=public --add-port=443/tcp --permanent
 firewall-cmd --zone=public --add-port=80/tcp --permanent
 firewall-cmd --reload
 
+# change the admin password
+htdigest /etc/linotp2/admins "LinOTP2 admin area" admin
+
 # navigate to admin portal
 https://<ip>/manage
 Username: admin
-Password: Tio1LApw
 ```
 
 
