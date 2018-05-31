@@ -87,6 +87,15 @@ Username: admin
 You should now be able to see your users from the User View
 
 ### Policies
+Go to the Policies tab to import policy.cfg. The policy allow for the following:
+1. TOTP enrollment in the user portal
+2. Reset Token
+3. Resync Token
+4. Set OTP Pin
+5. Disable Token
+
+Adjust the policies as per business need.
+
 
 ## Installing Freeradius
 
