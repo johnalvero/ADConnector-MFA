@@ -198,6 +198,9 @@ rm /etc/raddb/sites-enabled/inner-tunnel
 cp /usr/local/ADConnector-MFA/linotp /etc/raddb/sites-available/
 ln -s /etc/raddb/sites-available/linotp /etc/raddb/sites-enabled/linotp
 rm /etc/raddb/mods-enabled/eap 
+
+# Temporarily start radius
+radiusd -X
 ```
 ## Testing Radius Authentication (OTP)
 ```
@@ -213,4 +216,7 @@ Sent Access-Request Id 19 from 0.0.0.0:50410 to 127.0.0.1:1812 length 81
 	Cleartext-Password = "375937"
 Received Access-Accept Id 19 from 127.0.0.1:1812 to 0.0.0.0:0 length 43
 	Reply-Message = "LinOTP access granted"
+	
+systemctl enable radiusd
+systemctl start radiusd
 ```
