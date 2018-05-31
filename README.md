@@ -1,7 +1,13 @@
 # ADConnector MFA
 
+## Connectivity Diagram
+
+![diagram](https://github.com/johnalvero/ADConnector-MFA/blob/master/diagram.jpeg)
+
 ## NTP
 ```
+
+# Install the NTP package
 yum install -y ntp
 
 cat <<'EOF'> /etc/ntp.conf
@@ -34,27 +40,29 @@ semanage fcontext -a -t httpd_sys_rw_content_t "/var/log/linotp(/.*)?"
 
 ## Installing LinOTP
 ```
-yum install git -y
-git clone https://github.com/johnalvero/ADConnector-MFA.git /usr/local/ADConnector-MFA
+yum install git epel-release -y
 yum localinstall http://linotp.org/rpm/el7/linotp/x86_64/Packages/LinOTP_repos-1.1-1.el7.x86_64.rpm
-yum install -y epel-release
+git clone https://github.com/johnalvero/ADConnector-MFA.git /usr/local/ADConnector-MFA
 
+# MariaDB
 yum install mariadb-server -y
 systemctl enable mariadb
 systemctl start mariadb
 mysql_secure_installation
 
+# LinOTP
 yum install -y LinOTP LinOTP_mariadb 
-
 restorecon -Rv /etc/linotp2/
 restorecon -Rv /var/log/linotp
 
+# Setup the dababase and credentials
 linotp-create-mariadb
 
+# Lock python-repoze-who version
 yum install yum-plugin-versionlock
 yum versionlock python-repoze-who
 
-# install apache and config
+# install apache and vhost config
 yum install LinOTP_apache
 setsebool -P httpd_can_network_connect_db on
 setsebool -P httpd_can_connect_ldap on
@@ -106,7 +114,7 @@ Username: admin
 You should now be able to see your users from the User View
 
 ### Policies
-Go to the Policies tab to import policy.cfg. The policy allow for the following:
+Go to the Policies tab to import *policy.cfg*. The policy allow for the following:
 1. TOTP enrollment in the selfservice portal
 2. Reset Token
 3. Resync Token
@@ -115,7 +123,7 @@ Go to the Policies tab to import policy.cfg. The policy allow for the following:
 6. Limit to one token per user
 7. Use token to authenticate
 
-Adjust the policies as per business need.
+Adjust the policies as needed.
 
 ### Assign a token to test user
 
@@ -135,7 +143,7 @@ You now have a TOTP token to be used for MFA.
 ```
 curl -k 'https://localhost/validate/check?user=<username>&pass=<Token-From-Google-Authenticator>'
 
-# Successful authentication should yielf the following
+# Successful authentication should yield the following
 {
    "version": "LinOTP 2.10.0.3", 
    "jsonrpc": "2.0802", 
@@ -149,14 +157,14 @@ curl -k 'https://localhost/validate/check?user=<username>&pass=<Token-From-Googl
 If this is not the output you see, go back and review the installation steps.
 ```
 
-## Installing Freeradius
+## Installing Freeradius and packages
 ```
-yum  install -t yum install freeradius freeradius-perl freeradius-utils
+yum  install -t yum install freeradius freeradius-perl freeradius-utils perl-App-cpanminus perl-LWP-Protocol-https
+cpanm Config::File
 ```
 
 ## Configuring FreeRadius
 ```
-
 mv /etc/raddb/clients.conf /etc/raddb/clients.conf.back
 mv /etc/raddb/users /etc/raddb/users.back
 
@@ -174,17 +182,20 @@ client adconnector {
 }
 EOF
 
-yum install -y git perl-App-cpanminus perl-LWP-Protocol-https
+# Download the freeradius linotp perl module
 git clone https://github.com/LinOTP/linotp-auth-freeradius-perl.git /usr/share/linotp/linotp-auth-freeradius-perl
-cpanm Config::File
 
+# Setup the linotp perl module
 cat << 'EOF' > /etc/raddb/mods-available/perl
 perl {
 	filename = /usr/share/linotp/linotp-auth-freeradius-perl/radius_linotp.pm
 }
 EOF
+
+# Activate it
 ln -s /etc/raddb/mods-available/perl /etc/raddb/mods-enabled/perl
 
+# freeradius linotp perl config
 cat << 'EOF > /etc/linotp2/rlm_perl.ini
 URL=https://localhost/validate/simplecheck
 REALM=<your-realm>
@@ -192,11 +203,14 @@ Debug=True
 SSL_CHECK=False
 EOF
 
+# Remove unnecessary config
 rm /etc/raddb/sites-enabled/inner-tunnel 
+rm /etc/raddb/mods-enabled/eap 
 
+# Activate the freeradius linotp virtual host
 cp /usr/local/ADConnector-MFA/linotp /etc/raddb/sites-available/
 ln -s /etc/raddb/sites-available/linotp /etc/raddb/sites-enabled/linotp
-rm /etc/raddb/mods-enabled/eap 
+
 
 # Temporarily start radius
 radiusd -X
