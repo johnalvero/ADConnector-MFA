@@ -88,14 +88,29 @@ You should now be able to see your users from the User View
 
 ### Policies
 Go to the Policies tab to import policy.cfg. The policy allow for the following:
-1. TOTP enrollment in the user portal
+1. TOTP enrollment in the selfservice portal
 2. Reset Token
 3. Resync Token
 4. Set OTP Pin
 5. Disable Token
+6. Limit to one token per user
+7. Use token to authenticate
 
 Adjust the policies as per business need.
 
+### Assign a token to test user
+
+ 1. Navigate to https://<ip>
+ 2. Use your AD username & password to authenticate
+ 3. In the Enroll TOTP token tab, choose the following
+'''
+Generate Random Seed
+ Google Authenticator compliant
+'''
+ 4. Click enroll TOTP token
+ 5. Scan the QR code using Google Authenticator in your mobile phone
+
+You now have a TOTP token to be used for MFA.
 
 ## Installing Freeradius
 
