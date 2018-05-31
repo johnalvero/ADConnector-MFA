@@ -103,10 +103,10 @@ Adjust the policies as per business need.
  1. Navigate to `https://<ip>/`
  2. Use your AD username & password to authenticate
  3. In the Enroll TOTP token tab, choose the following
-'''
+```
 Generate Random Seed
  Google Authenticator compliant
-'''
+```
  4. Click enroll TOTP token
  5. Scan the QR code using Google Authenticator in your mobile phone
 
