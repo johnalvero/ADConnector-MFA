@@ -78,9 +78,9 @@ htdigest /etc/linotp2/admins "LinOTP2 admin area" admin
 ```
 vi /usr/lib/python2.7/site-packages/linotp/lib/userservice.py
 
-# try to get (local) selfservice
-# if none is present fall back to possible
-# userauthcookie (cookie for remote self service)
+\# try to get (local) selfservice
+\# if none is present fall back to possible
+\# userauthcookie (cookie for remote self service)
 
 cookie = request.cookies.get(
     'user_selfservice', request.cookies.get(
