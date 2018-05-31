@@ -48,6 +48,33 @@ yum install -y LinOTP LinOTP_mariadb
 
 restorecon -Rv /etc/linotp2/
 restorecon -Rv /var/log/linotp
+
+linotp-create-mariadb
+
+yum install yum-plugin-versionlock
+yum versionlock python-repoze-who
+
+# install apache and config
+yum install LinOTP_apache
+setsebool -P httpd_can_network_connect_db on
+setsebool -P httpd_can_connect_ldap on
+
+mv /etc/httpd/conf.d/ssl.conf /etc/httpd/conf.d/ssl.conf.back
+mv /etc/httpd/conf.d/ssl_linotp.conf.template /etc/httpd/conf.d/ssl_linotp.conf
+
+
+systemctl enable httpd
+systemctl start httpd
+
+# openfirewall
+firewall-cmd --zone=public --add-port=443/tcp --permanent
+firewall-cmd --zone=public --add-port=80/tcp --permanent
+firewall-cmd --reload
+
+# navigate to admin portal
+https://<ip>/manage
+Username: admin
+Password: Tio1LApw
 ```
 
 
