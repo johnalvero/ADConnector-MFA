@@ -1,0 +1,74 @@
+server default {
+
+listen {
+	type = auth
+	ipaddr = *
+	port = 0
+
+	limit {
+	      max_connections = 16
+	      lifetime = 0
+	      idle_timeout = 30
+	}
+}
+
+listen {
+	ipaddr = *
+	port = 0
+	type = acct
+}
+
+
+
+authorize {
+        preprocess
+        IPASS
+        suffix
+        ntdomain
+        files
+        expiration
+        logintime
+        update control {
+                Auth-Type := Perl
+        }
+        pap
+}
+
+authenticate {
+	Auth-Type Perl {
+		perl
+	}
+}
+
+
+preacct {
+	preprocess
+	acct_unique
+	suffix
+	files
+}
+
+accounting {
+	detail
+	unix
+	-sql
+	exec
+	attr_filter.accounting_response
+}
+
+
+session {
+
+}
+
+
+post-auth {
+	update {
+		&reply: += &session-state:
+	}
+
+	-sql
+	exec
+	remove_reply_message_if_eap
+}
+}
