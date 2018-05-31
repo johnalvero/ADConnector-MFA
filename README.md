@@ -4,7 +4,7 @@
 ```
 yum install -y ntp
 
-cat <<'EOF' /etc/ntp.conf
+cat <<'EOF'> /etc/ntp.conf
 # by default act only as a basic NTP client
 restrict -4 default nomodify nopeer noquery notrap
 restrict -6 default nomodify nopeer noquery notrap
@@ -29,8 +29,6 @@ yum install policycoreutils-python -y
 semanage fcontext -a -t httpd_sys_content_t "/etc/linotp2(/.*)?"
 semanage fcontext -a -t httpd_sys_rw_content_t "/etc/linotp2/data(/.*)?"
 semanage fcontext -a -t httpd_sys_rw_content_t "/var/log/linotp(/.*)?"
-setsebool -P httpd_can_network_connect_db on
-setsebool -P httpd_can_connect_ldap on
 ```
 
 
@@ -64,13 +62,14 @@ setsebool -P httpd_can_connect_ldap on
 mv /etc/httpd/conf.d/ssl.conf /etc/httpd/conf.d/ssl.conf.back
 mv /etc/httpd/conf.d/ssl_linotp.conf.template /etc/httpd/conf.d/ssl_linotp.conf
 
-
 systemctl enable httpd
 systemctl start httpd
 
 # openfirewall
 firewall-cmd --zone=public --add-port=443/tcp --permanent
 firewall-cmd --zone=public --add-port=80/tcp --permanent
+firewall-cmd --zone=public --add-port=1812/udp --permanent
+firewall-cmd --zone=public --add-port=1813/udp --permanent
 firewall-cmd --reload
 
 # change the admin password
