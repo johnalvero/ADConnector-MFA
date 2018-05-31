@@ -1,4 +1,4 @@
-# ADConnector-MFA
+# ADConnector MFA
 
 ## NTP
 ```
