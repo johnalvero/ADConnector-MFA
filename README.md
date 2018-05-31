@@ -133,6 +133,19 @@ You now have a TOTP token to be used for MFA.
 ### Test the token
 ```
 curl -k 'https://localhost/validate/check?user=<username>&pass=<Token-From-Google-Authenticator>'
+
+# Successful authentication should yielf the following
+{
+   "version": "LinOTP 2.10.0.3", 
+   "jsonrpc": "2.0802", 
+   "result": {
+      "status": true, 
+      "value": true
+   }, 
+   "id": 0
+}
+
+If this is not the output you see, go back and review the installation steps.
 ```
 
 ## Installing Freeradius
