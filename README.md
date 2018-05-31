@@ -37,7 +37,7 @@ setsebool -P httpd_can_connect_ldap on
 ## Installing LinOTP
 ```
 yum install git -y
-https://github.com/johnalvero/ADConnector-MFA.git /usr/local
+git clone https://github.com/johnalvero/ADConnector-MFA.git /usr/local/ADConnector-MFA
 yum localinstall http://linotp.org/rpm/el7/linotp/x86_64/Packages/LinOTP_repos-1.1-1.el7.x86_64.rpm
 yum install -y epel-release
 
@@ -152,7 +152,7 @@ If this is not the output you see, go back and review the installation steps.
 
 ## Installing Freeradius
 ```
-yum  install -t yum install freeradius freeradius-perl
+yum  install -t yum install freeradius freeradius-perl freeradius-utils
 ```
 
 ## Configuring FreeRadius
@@ -195,7 +195,22 @@ EOF
 
 rm /etc/raddb/sites-enabled/inner-tunnel 
 
-cp xxx /etc/raddb/sites-available/linotp
-ln -s /etc/raddb/sites-available/linotp /etc/raddb/sites-available/linotp
+cp /usr/local/ADConnector-MFA/linotp /etc/raddb/sites-available/
+ln -s /etc/raddb/sites-available/linotp /etc/raddb/sites-enabled/linotp
+rm /etc/raddb/mods-enabled/eap 
 ```
 ## Testing Radius Authentication (OTP)
+```
+radtest <username> <token-from-google-authenticator> localhost 0 SECRET
+
+# Success result
+Sent Access-Request Id 19 from 0.0.0.0:50410 to 127.0.0.1:1812 length 81
+	User-Name = "<username>"
+	User-Password = "375937"
+	NAS-IP-Address = 127.0.0.1
+	NAS-Port = 0
+	Message-Authenticator = 0x00
+	Cleartext-Password = "375937"
+Received Access-Accept Id 19 from 127.0.0.1:1812 to 0.0.0.0:0 length 43
+	Reply-Message = "LinOTP access granted"
+```
