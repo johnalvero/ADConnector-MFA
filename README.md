@@ -151,9 +151,46 @@ If this is not the output you see, go back and review the installation steps.
 ## Installing Freeradius
 ```
 yum  install -t yum install freeradius freeradius-perl
-
 ```
 
 ## Configuring FreeRadius
+```
 
+mv /etc/raddb/clients.conf /etc/raddb/clients.conf.back
+mv /etc/raddb/users /etc/raddb/users.back
+
+cat << 'EOF' > /etc/raddb/clients.conf
+client localhost {
+        ipaddr  = 127.0.0.1
+        netmask = 32            
+        secret  = 'SECRET' 
+}
+
+client adconnector {
+        ipaddr  = <ip-range-of-ad-connector>
+        netmask = <netmask-bit>            
+        secret  = 'SECRET' 
+}
+EOF
+
+yum install -y git perl-App-cpanminus perl-LWP-Protocol-https
+git clone https://github.com/LinOTP/linotp-auth-freeradius-perl.git /usr/share/linotp/linotp-auth-freeradius-perl
+cpanm Config::File
+
+cat << 'EOF' > /etc/raddb/mods-available/perl
+perl {
+	filename = /usr/share/linotp/linotp-auth-freeradius-perl/radius_linotp.pm
+}
+EOF
+ln -s /etc/raddb/mods-available/perl /etc/raddb/mods-enabled/perl
+
+cat << 'EOF > /etc/linotp2/rlm_perl.ini
+URL=https://localhost/validate/simplecheck
+REALM=<your-realm>
+Debug=True
+SSL_CHECK=False
+EOF
+
+rm /etc/raddb/sites-enabled/inner-tunnel 
+```
 ## Testing Radius Authentication (OTP)
