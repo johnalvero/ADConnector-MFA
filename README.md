@@ -130,6 +130,11 @@ Google Authenticator compliant
 
 You now have a TOTP token to be used for MFA.
 
+### Test the token
+```
+curl -k 'https://localhost/validate/check?user=<username>&pass=<Token-From-Google-Authenticator>'
+```
+
 ## Installing Freeradius
 
 ## Configuring FreeRadius
