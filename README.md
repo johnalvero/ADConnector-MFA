@@ -196,7 +196,7 @@ EOF
 ln -s /etc/raddb/mods-available/perl /etc/raddb/mods-enabled/perl
 
 # freeradius linotp perl config
-cat << 'EOF > /etc/linotp2/rlm_perl.ini
+cat << 'EOF' > /etc/linotp2/rlm_perl.ini
 URL=https://localhost/validate/simplecheck
 REALM=<your-realm>
 Debug=True
