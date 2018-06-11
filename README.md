@@ -5,8 +5,8 @@
 ![diagram](https://github.com/johnalvero/ADConnector-MFA/blob/master/diagram.jpeg)
 
 ## NTP
+If you are dealing with TOTP, time syncronization is important. This is specially more important if you are working with virtualized environment.
 ```
-
 # Install the NTP package
 yum install -y ntp
 
@@ -30,6 +30,7 @@ systemctl start ntpd
 ```
 
 ## SELinux
+LinOTP can support SELinux. No need to disable SELinux, just do the following:
 ```
 yum install policycoreutils-python -y
 semanage fcontext -a -t httpd_sys_content_t "/etc/linotp2(/.*)?"
@@ -44,7 +45,7 @@ yum install git epel-release -y
 yum localinstall http://linotp.org/rpm/el7/linotp/x86_64/Packages/LinOTP_repos-1.1-1.el7.x86_64.rpm
 git clone https://github.com/johnalvero/ADConnector-MFA.git /usr/local/ADConnector-MFA
 
-# MariaDB
+# MariaDB (can also work with MySQL)
 yum install mariadb-server -y
 systemctl enable mariadb
 systemctl start mariadb
@@ -84,6 +85,7 @@ firewall-cmd --reload
 htdigest /etc/linotp2/admins "LinOTP2 admin area" admin
 
 # Fix LinOTP bug @ https://github.com/LinOTP/LinOTP/issues/85
+# Fixes the bug where a session expired error is encountered everywhere in the admin portal
 
 vi /usr/lib/python2.7/site-packages/linotp/lib/userservice.py
 
@@ -114,7 +116,7 @@ Username: admin
 You should now be able to see your users from the User View
 
 ### Policies
-Go to the Policies tab to import *policy.cfg*. The policy allow for the following:
+Go to the Policies tab to import *policy.cfg*. The policy will setup the following:
 1. TOTP enrollment in the selfservice portal
 2. Reset Token
 3. Resync Token
@@ -123,7 +125,7 @@ Go to the Policies tab to import *policy.cfg*. The policy allow for the followin
 6. Limit to one token per user
 7. Use token to authenticate
 
-Adjust the policies as needed.
+Adjust the policies as needed. But for testing purposes, the applied policy is enough.
 
 ### Assign a token to test user
 
@@ -159,7 +161,7 @@ If this is not the output you see, go back and review the installation steps.
 
 ## Installing Freeradius and packages
 ```
-yum  install -t yum install freeradius freeradius-perl freeradius-utils perl-App-cpanminus perl-LWP-Protocol-https
+yum  install -y yum install freeradius freeradius-perl freeradius-utils perl-App-cpanminus perl-LWP-Protocol-https
 cpanm Config::File
 ```
 
