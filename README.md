@@ -236,3 +236,11 @@ Received Access-Accept Id 19 from 127.0.0.1:1812 to 0.0.0.0:0 length 43
 systemctl enable radiusd
 systemctl start radiusd
 ```
+## Enable radius-based MFA in AD Connector
+In your AD Connector directory, go to the __Multi-Factor authentication__ tab. Apply the following settings
+```
+Enable Multi-Factor Authentication: Tick
+RADIUS server IP address(es): <IP address of the radius server>
+Shared secret code: <radius shared secret>
+Protocol: PAP
+```
