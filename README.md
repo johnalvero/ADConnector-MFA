@@ -245,4 +245,4 @@ Shared secret code: <radius shared secret>
 Protocol: PAP
 ```
 ### Login to the AWS Console
-Moment of truth. It's time to login to your AWS console https://<xxx>.awsapps.com/console/
+Moment of truth. It's time to login to your AWS console `https://<xxx>.awsapps.com/console/`
