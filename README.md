@@ -4,6 +4,9 @@
 
 ![diagram](https://github.com/johnalvero/ADConnector-MFA/blob/master/diagram.jpeg)
 
+## Note
+Guide done in CentOS 7. Adjust guide for your own environment as necessary.
+
 ## NTP
 If you are dealing with TOTP, time syncronization is important. This is specially more important if you are working with virtualized environment.
 ```
