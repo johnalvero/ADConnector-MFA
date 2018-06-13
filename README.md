@@ -161,7 +161,7 @@ If this is not the output you see, go back and review the installation steps.
 
 ## Installing Freeradius and packages
 ```
-yum  install -y yum install freeradius freeradius-perl freeradius-utils perl-App-cpanminus perl-LWP-Protocol-https
+yum  install -y yum install freeradius freeradius-perl freeradius-utils perl-App-cpanminus perl-LWP-Protocol-https perl-Try-Tiny
 cpanm Config::File
 ```
 
@@ -190,7 +190,7 @@ git clone https://github.com/LinOTP/linotp-auth-freeradius-perl.git /usr/share/l
 # Setup the linotp perl module
 cat << 'EOF' > /etc/raddb/mods-available/perl
 perl {
-	filename = /usr/share/linotp/linotp-auth-freeradius-perl/radius_linotp.pm
+     filename = /usr/share/linotp/linotp-auth-freeradius-perl/radius_linotp.pm
 }
 EOF
 
@@ -206,7 +206,8 @@ SSL_CHECK=False
 EOF
 
 # Remove unnecessary config
-rm /etc/raddb/sites-enabled/inner-tunnel 
+rm /etc/raddb/sites-enabled/inner-tunnel
+rm /etc/raddb/sites-enabled/default
 rm /etc/raddb/mods-enabled/eap 
 
 # Activate the freeradius linotp virtual host
