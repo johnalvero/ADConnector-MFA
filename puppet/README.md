@@ -4,4 +4,12 @@
 dd if=/dev/urandom of=encKey bs=1 count=96
 aws s3 cp encKey s3://<bucket/<path>/encKey
 ```
-2. xx
+2. Create the admin digest authentication
+```
+
+```
+3. Open the file init.pp and setup the configurable parameters
+3. Apply the puppet script
+```
+puppet apply init.pp --parser future
+```
