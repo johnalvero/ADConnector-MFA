@@ -1,24 +1,24 @@
-$token_enckey_location	= "s3://<bucket>/<path>/encKey"   # Create by dd if=/dev/urandom of=encKey bs=1 count=96
-$db_host				= "localhost"
-$db_port				= "3306"
-$db_user				= "linotp"
-$db_pass				= "<DB-Password"
-$db_name				= "LINOTP"
-$admin_digest_user      		= "<admin-user>"
-$admin_digest_password  		= "<admin-password>"
-$realm					= "<realm>"
+$token_enckey_location		= "s3://<bucket>/<path>/encKey"
+$db_host			= "localhost"
+$db_port			= "3306"
+$db_user			= "linotp"
+$db_pass			= "<DB-Password"
+$db_name			= "LINOTP"
+$admin_digest_user      	= "<admin-user>"
+$admin_digest_password  	= "<admin-password>"
+$realm				= "<realm>"
 
 $radius_clients = {
     'localhost' => {
-        'ipaddr' => '127.0.0.1',
+        'ipaddr'  => '127.0.0.1',
         'netmask' => '32',
-        'secret' => '<your-secret>',
+        'secret'  => '<your-secret>',
     },
 
     'adconnector' => {
-        'ipaddr' => '10.0.0.0',
+        'ipaddr'  => '10.0.0.0',
         'netmask' => '16',
-        'secret' => '<your-secret>',
+        'secret'  => '<your-secret>',
     },
 }
 
@@ -196,58 +196,58 @@ END
 class linotp {
 
 	exec { 'linotp_repo':
-		command			=> "/usr/bin/yum -y localinstall http://linotp.org/rpm/el7/linotp/x86_64/Packages/LinOTP_repos-1.1-1.el7.x86_64.rpm",
-		creates			=> '/etc/yum.repos.d/linotp.repo'
+		command		=> "/usr/bin/yum -y localinstall http://linotp.org/rpm/el7/linotp/x86_64/Packages/LinOTP_repos-1.1-1.el7.x86_64.rpm",
+		creates		=> '/etc/yum.repos.d/linotp.repo'
 	}
 
 	package { 'linotp_package':
-		name			=> "LinOTP",
-		ensure			=> present,
+		name		=> "LinOTP",
+		ensure		=> present,
 		allow_virtual 	=> false,
-		require 		=> Exec['linotp_repo']
+		require 	=> Exec['linotp_repo']
 	}
 
-    package { 'linotp_package_apache':
-        name    		=> "LinOTP_apache",
-        ensure  		=> present,
-        allow_virtual 	=> false,
-        require 		=> Package['linotp_package']
-    }
+	package { 'linotp_package_apache':
+        	name    	=> "LinOTP_apache",
+		ensure  	=> present,
+		allow_virtual 	=> false,
+		require 	=> Package['linotp_package']
+   	}
 
  	package {'yum-plugin-versionlock':
-		ensure 			=> present,
+		ensure 		=> present,
 		allow_virtual 	=> false,
 	}
 
 	exec { 'lock_python-repoze-who':
-		command 		=> '/usr/bin/yum versionlock python-repoze-who',
-		unless  		=> '/usr/bin/yum versionlock list | /usr/bin/grep python-repoze-who 2>&1 >> /dev/null',
-		require 		=> Package['yum-plugin-versionlock'],
+		command 	=> '/usr/bin/yum versionlock python-repoze-who',
+		unless  	=> '/usr/bin/yum versionlock list | /usr/bin/grep python-repoze-who 2>&1 >> /dev/null',
+		require 	=> Package['yum-plugin-versionlock'],
 	}
 
 	file { 'absent_ssl_default_config':
-		path 			=> "/etc/httpd/conf.d/ssl.conf",
-		ensure 			=> absent,
-		require 		=> Package['linotp_package_apache'],
+		path 		=> "/etc/httpd/conf.d/ssl.conf",
+		ensure 		=> absent,
+		require 	=> Package['linotp_package_apache'],
 	}
 
 	file { 'apache_linotp_config':
-		path  			=> '/etc/httpd/conf.d/ssl_linotp.conf',
-		ensure 			=> present,
-		require 		=> Package['linotp_package_apache'],
-		content 		=> file('/etc/httpd/conf.d/ssl_linotp.conf.template'),
+		path  		=> '/etc/httpd/conf.d/ssl_linotp.conf',
+		ensure 		=> present,
+		require 	=> Package['linotp_package_apache'],
+		content 	=> file('/etc/httpd/conf.d/ssl_linotp.conf.template'),
 	}
 
 	file { 'linotp_ini':
-		ensure 			=> file,
-		path			=> "/etc/linotp2/linotp.ini",
-		content			=> inline_epp($linotp_conf_template, {'tmpl_db_user' => $db_user,'tmpl_db_pass' => $db_pass, 'tmpl_db_host' => $db_host, 'tmpl_db_port' => $db_port, 'tmpl_db_name' => $db_name}),
- 		require 		=> Package['linotp_package'];	
+		ensure 		=> file,
+		path		=> "/etc/linotp2/linotp.ini",
+		content		=> inline_epp($linotp_conf_template, {'tmpl_db_user' => $db_user,'tmpl_db_pass' => $db_pass, 'tmpl_db_host' => $db_host, 'tmpl_db_port' => $db_port, 'tmpl_db_name' => $db_name}),
+ 		require 	=> Package['linotp_package'];	
 	}
 
 	exec { 'encKey':
-		command 		=> "/usr/bin/aws s3 cp $token_enckey_location /etc/linotp2/encKey && /usr/bin/chmod 640 /etc/linotp2/encKey &&  /usr/bin/chown linotp.root /etc/linotp2/encKey",
-		creates 		=> "/etc/linotp2/encKey",
+		command 	=> "/usr/bin/aws s3 cp $token_enckey_location /etc/linotp2/encKey && /usr/bin/chmod 640 /etc/linotp2/encKey &&  /usr/bin/chown linotp.root /etc/linotp2/encKey",
+		creates 	=> "/etc/linotp2/encKey",
 	}
 	
 	# Realm is hard-coded for now because its also hard-coded in the apache config
@@ -255,18 +255,18 @@ class linotp {
     	$htcontent = "$admin_digest_user:LinOTP2 admin area:$pwdigest"
 
 	file { 'htpasswd_admin':
-		path			=> "/etc/linotp2/admins",
-		content 		=> $htcontent,
-		mode			=> 0640,
-		owner			=> "linotp",
-		group			=> "apache",
+		path		=> "/etc/linotp2/admins",
+		content 	=> $htcontent,
+		mode		=> 0640,
+		owner		=> "linotp",
+		group		=> "apache",
 	}
 
 	service { 'httpd':
-		ensure 			=> running,
-		name 			=> httpd,
-		enable 			=> true,
-		subscribe 		=> [File['apache_linotp_config'], File['linotp_ini']]
+		ensure 		=> running,
+		name 		=> httpd,
+		enable 		=> true,
+		subscribe 	=> [File['apache_linotp_config'], File['linotp_ini']]
 	}
 
 }
@@ -275,91 +275,88 @@ class linotp {
 class freeradius {
 	$required_packages = ['freeradius', 'freeradius-perl', 'freeradius-utils', 'perl-App-cpanminus', 'perl-LWP-Protocol-https', 'perl-Try-Tiny']
 	package { $required_packages:
-		ensure			=> present,
+		ensure		=> present,
 		allow_virtual 	=> false,
 	}
 
 	file { 'raddb_clients_conf':
-        ensure      	=> file,
-        path        	=> "/etc/raddb/clients.conf",
-        content     	=> inline_epp($radius_client_conf_template, $radius_clients),
-		owner			=> root,
-		group			=> radiusd,
-		mode			=> 0640,
-		require			=> Package[$required_packages],
+		ensure      	=> file,
+		path        	=> "/etc/raddb/clients.conf",
+		content     	=> inline_epp($radius_client_conf_template, $radius_clients),
+		owner		=> root,
+		group		=> radiusd,
+		mode		=> 0640,
+		require		=> Package[$required_packages],
     }
 
 	exec { 'linotp_perl_module':
-		command			=> "/usr/bin/curl -so /usr/share/linotp/radius_linotp.pm https://raw.githubusercontent.com/johnalvero/linotp-auth-freeradius-perl/master/radius_linotp.pm",
-		creates			=> "/usr/share/linotp/radius_linotp.pm",
+		command		=> "/usr/bin/curl -so /usr/share/linotp/radius_linotp.pm https://raw.githubusercontent.com/johnalvero/linotp-auth-freeradius-perl/master/radius_linotp.pm",
+		creates		=> "/usr/share/linotp/radius_linotp.pm",
 		require     	=> Package[$required_packages],
 	}
 
 	file { 'linotp_perl_module_file':
-		ensure			=> file,
-		path			=> "/etc/raddb/mods-available/perl",
-		content			=> inline_epp($linotp_perl_module_template),
-        owner   		=> root,
-        group   		=> radiusd,
-        mode    		=> 0640,
-        require 		=> Package[$required_packages],
+		ensure		=> file,
+		path		=> "/etc/raddb/mods-available/perl",
+		content		=> inline_epp($linotp_perl_module_template),
+		owner   	=> root,
+		group   	=> radiusd,
+		mode    	=> 0640,
+		require 	=> Package[$required_packages],
 	}
 
 	file { '/etc/raddb/mods-enabled/perl':
-		ensure			=> 'link',
-		target			=>	'/etc/raddb/mods-available/perl',
-		require 		=> File['linotp_perl_module_file'],
+		ensure		=> 'link',
+		target		=> '/etc/raddb/mods-available/perl',
+		require 	=> File['linotp_perl_module_file'],
 
 	}
 
 	file { '/etc/linotp2/rlm_perl.ini':
-		ensure			=> file,
-		content			=> inline_epp($perl_module_config_template, {'realm' => $realm}),
-		owner   		=> linotp,
-        group   		=> root,
-        mode    		=> 0640,
-        require 		=> Package[$required_packages],
+		ensure		=> file,
+		content		=> inline_epp($perl_module_config_template, {'realm' => $realm}),
+		owner   	=> linotp,
+		group   	=> root,
+		mode    	=> 0640,
+		require 	=> Package[$required_packages],
 	}
 
 	file { '/etc/raddb/sites-enabled/inner-tunnel':
-		ensure			=> absent,
-		require 		=> Package[$required_packages],
+		ensure		=> absent,
+		require 	=> Package[$required_packages],
 	}
 
-    file { '/etc/raddb/sites-enabled/default':
-        ensure  		=> absent,
-        require 		=> Package[$required_packages],
-    }
+	file { '/etc/raddb/sites-enabled/default':
+		ensure  	=> absent,
+		require 	=> Package[$required_packages],
+	}
 
-    file { '/etc/raddb/mods-enabled/eap':
-        ensure  		=> absent,
-        require 		=> Package[$required_packages],
-    }
+	file { '/etc/raddb/mods-enabled/eap':
+        	ensure  	=> absent,
+        	require 	=> Package[$required_packages],
+	}
 
 	file { '/etc/raddb/sites-available/linotp':
-		ensure			=> file,
-		content			=> inline_epp($linotp_main_config_template),
-		owner   		=> root,
-        group   		=> radiusd,
-        mode    		=> 0640,
-        require 		=> Package[$required_packages],
+		ensure		=> file,
+		content		=> inline_epp($linotp_main_config_template),
+		owner   	=> root,
+		group   	=> radiusd,
+		mode    	=> 0640,
+		require 	=> Package[$required_packages],
 	}
 
-    file { '/etc/raddb/sites-enabled/linotp':
-        ensure  		=> 'link',
-        target  		=> '/etc/raddb/sites-available/linotp',
-        require 		=> Package[$required_packages],
+	file { '/etc/raddb/sites-enabled/linotp':
+        	ensure  	=> 'link',
+        	target  	=> '/etc/raddb/sites-available/linotp',
+        	require 	=> Package[$required_packages],
+	}
 
-    }
-
-    service { 'radiusd':
-        ensure 			=> running,
-        name 			=> radiusd,
-        enable 			=> true,
-        subscribe 		=> [File['/etc/raddb/sites-available/linotp'], File['/etc/linotp2/rlm_perl.ini'], File['raddb_clients_conf']]
-    }
-
-
+	service { 'radiusd':
+		ensure 			=> running,
+		name 			=> radiusd,
+		enable 			=> true,
+		subscribe 		=> [File['/etc/raddb/sites-available/linotp'], File['/etc/linotp2/rlm_perl.ini'], File['raddb_clients_conf']],
+	}
 }
 
 include linotp
