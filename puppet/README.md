@@ -1,3 +1,8 @@
+## Assumptions
+  - SELinux is disabled
+  - OS IPtables is disabled
+  
+
 ## Puppet Instructions
 1. Create the database (RDS MySQL/Stand Alone EC2)
 2. Create the token encryption key and upload to S3
@@ -13,6 +18,7 @@ echo "$USERNAME:$REALM:$PWDIGEST"
 ```
 4. Open the file init.pp and setup the configurable parameters
 5. Apply the puppet script
+6. Make sure that the instance has a role or credentials to pull the encKey from the bucket
 ```
 puppet apply init.pp --parser future
 ```
