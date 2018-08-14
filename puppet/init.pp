@@ -4,7 +4,8 @@ $db_port				= "3306"
 $db_user				= "linotp"
 $db_pass				= "<DB-Password"
 $db_name				= "LINOTP"
-$htpasswd_admin_user	= "<username>:LinOTP2 admin area:<password-ht-hash>"
+$admin_digest_user      		= "<admin-user>"
+$admin_digest_password  		= "<admin-password>"
 $realm					= "<realm>"
 
 $radius_clients = {
@@ -248,10 +249,14 @@ class linotp {
 		command 		=> "/usr/bin/aws s3 cp $token_enckey_location /etc/linotp2/encKey && /usr/bin/chmod 640 /etc/linotp2/encKey &&  /usr/bin/chown linotp.root /etc/linotp2/encKey",
 		creates 		=> "/etc/linotp2/encKey",
 	}
+	
+	# Realm is hard-coded for now because its also hard-coded in the apache config
+	$pwdigest  = "$admin_digest_user:LinOTP2 admin area:$admin_digest_password".md5
+    	$htcontent = "$admin_digest_user:LinOTP2 admin area:$pwdigest"
 
 	file { 'htpasswd_admin':
 		path			=> "/etc/linotp2/admins",
-		content 		=> $htpasswd_admin_user,
+		content 		=> $htcontent,
 		mode			=> 0640,
 		owner			=> "linotp",
 		group			=> "apache",
