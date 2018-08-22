@@ -350,12 +350,17 @@ class freeradius {
         	target  	=> '/etc/raddb/sites-available/linotp',
         	require 	=> Package[$required_packages],
 	}
+	
+	file { '/etc/raddb/users':
+                ensure          => absent,
+                require         => Package[$required_packages],
+        }
 
 	service { 'radiusd':
 		ensure 			=> running,
 		name 			=> radiusd,
 		enable 			=> true,
-		subscribe 		=> [File['/etc/raddb/sites-available/linotp'], File['/etc/linotp2/rlm_perl.ini'], File['raddb_clients_conf']],
+		subscribe 		=> [File['/etc/raddb/sites-available/linotp'], File['/etc/linotp2/rlm_perl.ini'], File['raddb_clients_conf'], File['/etc/raddb/users']],
 	}
 }
 
