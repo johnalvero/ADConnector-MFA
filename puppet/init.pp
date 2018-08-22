@@ -317,7 +317,7 @@ class freeradius {
 		content		=> inline_epp($perl_module_config_template, {'realm' => $realm}),
 		owner   	=> linotp,
 		group   	=> root,
-		mode    	=> 0640,
+		mode    	=> 0644,
 		require 	=> Package[$required_packages],
 	}
 
