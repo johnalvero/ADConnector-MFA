@@ -37,6 +37,8 @@ debug = false
 profile = false
 smtp_server = localhost
 error_email_from = paste@localhost
+linotpAudit.type = linotp.lib.audit.SQLAudit
+linotpAudit.sql.url = mysql://<%= $tmpl_db_user %>:<%= $tmpl_db_pass %>@<%= $tmpl_db_host %>:<%= $tmpl_db_port %>/<%= $tmpl_db_name %>
 linotpAudit.key.private = %(here)s/private.pem
 linotpAudit.key.public = %(here)s/public.pem
 linotpAudit.sql.highwatermark = 10000
@@ -242,7 +244,7 @@ class linotp {
 		ensure 		=> file,
 		path		=> "/etc/linotp2/linotp.ini",
 		content		=> inline_epp($linotp_conf_template, {'tmpl_db_user' => $db_user,'tmpl_db_pass' => $db_pass, 'tmpl_db_host' => $db_host, 'tmpl_db_port' => $db_port, 'tmpl_db_name' => $db_name}),
- 		require 	=> Package['linotp_package'];	
+ 		require 	=> Package['linotp_package'],
 	}
 
 	exec { 'encKey':
@@ -262,6 +264,19 @@ class linotp {
 		group		=> "apache",
 	}
 
+	exec { 'audit_private':
+                command         => "/usr/bin/aws s3 cp $token_enckey_location /etc/linotp2/private.pem && /usr/bin/chmod 640 /etc/linotp2/encKey &&  /usr/bin/chown root.apache /etc/linotp2/private.pem",
+                creates         => "/etc/linotp2/private.pem",
+		require		=> Package['linotp_package_apache'],
+        }
+
+        exec { 'audit_public':
+                command         => "/usr/bin/aws s3 cp $token_enckey_location /etc/linotp2/public.pem && /usr/bin/chmod 640 /etc/linotp2/encKey &&  /usr/bin/chown root.apache /etc/linotp2/public.pem",
+                creates         => "/etc/linotp2/public.pem",
+		require         => Package['linotp_package_apache'],
+        }
+	
+
 	service { 'httpd':
 		ensure 		=> running,
 		name 		=> httpd,
@@ -273,7 +288,7 @@ class linotp {
 
 
 class freeradius {
-	$required_packages = ['freeradius', 'freeradius-perl', 'freeradius-utils', 'perl-App-cpanminus', 'perl-LWP-Protocol-https', 'perl-Try-Tiny']
+	$required_packages = ['freeradius', 'freeradius-perl', 'freeradius-utils', 'perl-App-cpanminus', 'perl-LWP-Protocol-https', 'perl-Try-Tiny', 'MySQL-python']
 	package { $required_packages:
 		ensure		=> present,
 		allow_virtual 	=> false,
@@ -290,7 +305,7 @@ class freeradius {
     }
 
 	exec { 'linotp_perl_module':
-		command		=> "/usr/bin/curl -so /usr/share/linotp/radius_linotp.pm https://raw.githubusercontent.com/LinOTP/linotp-auth-freeradius-perl/master/radius_linotp.pm",
+		command		=> "/usr/bin/curl -so /usr/share/linotp/radius_linotp.pm https://raw.githubusercontent.com/LinOTP/linotp-auth-freeradius-perl/master/radius_linotp.pm && /bin/chmod 755 /usr/share/linotp/radius_linotp.pm",
 		creates		=> "/usr/share/linotp/radius_linotp.pm",
 		require     	=> Package[$required_packages],
 	}
@@ -350,17 +365,17 @@ class freeradius {
         	target  	=> '/etc/raddb/sites-available/linotp',
         	require 	=> Package[$required_packages],
 	}
-	
+
 	file { '/etc/raddb/users':
-                ensure          => absent,
-                require         => Package[$required_packages],
-        }
-	
+		ensure		=> absent,
+		require         => Package[$required_packages],
+	}
+
 	exec { 'install_Config-File':
-                command         => "/bin/cpanm Config::File",
-                creates         => "/usr/local/share/perl5/Config/File.pm",
-                require         => Package[$required_packages],
-        }
+		command		=> "/bin/cpanm Config::File",
+		creates		=> "/usr/local/share/perl5/Config/File.pm",
+		require		=> Package[$required_packages],
+	}
 
 	service { 'radiusd':
 		ensure 			=> running,
