@@ -290,7 +290,7 @@ class freeradius {
     }
 
 	exec { 'linotp_perl_module':
-		command		=> "/usr/bin/curl -so /usr/share/linotp/radius_linotp.pm https://raw.githubusercontent.com/johnalvero/linotp-auth-freeradius-perl/master/radius_linotp.pm",
+		command		=> "/usr/bin/curl -so /usr/share/linotp/radius_linotp.pm https://raw.githubusercontent.com/LinOTP/linotp-auth-freeradius-perl/master/radius_linotp.pm",
 		creates		=> "/usr/share/linotp/radius_linotp.pm",
 		require     	=> Package[$required_packages],
 	}
