@@ -355,6 +355,12 @@ class freeradius {
                 ensure          => absent,
                 require         => Package[$required_packages],
         }
+	
+	exec { 'install_Config-File':
+                command         => "/bin/cpanm Config::File",
+                creates         => "/usr/local/share/perl5/Config/File.pm",
+                require         => Package[$required_packages],
+        }
 
 	service { 'radiusd':
 		ensure 			=> running,
