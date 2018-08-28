@@ -1,4 +1,6 @@
 $token_enckey_location		= "s3://<bucket>/<path>/encKey"
+$audit_privatekey_location      = "s3://<bucket>/private.pem"
+$audit_publickey_location       = "s3://<bucket>/public.pem"
 $db_host			= "localhost"
 $db_port			= "3306"
 $db_user			= "linotp"
@@ -265,13 +267,13 @@ class linotp {
 	}
 
 	exec { 'audit_private':
-                command         => "/usr/bin/aws s3 cp $token_enckey_location /etc/linotp2/private.pem && /usr/bin/chmod 640 /etc/linotp2/encKey &&  /usr/bin/chown root.apache /etc/linotp2/private.pem",
+                command         => "/usr/bin/aws s3 cp $audit_privatekey_location /etc/linotp2/private.pem && /usr/bin/chmod 640 /etc/linotp2/private.pem &&  /usr/bin/chown root.apache /etc/linotp2/private.pem",
                 creates         => "/etc/linotp2/private.pem",
 		require		=> Package['linotp_package_apache'],
         }
 
         exec { 'audit_public':
-                command         => "/usr/bin/aws s3 cp $token_enckey_location /etc/linotp2/public.pem && /usr/bin/chmod 640 /etc/linotp2/encKey &&  /usr/bin/chown root.apache /etc/linotp2/public.pem",
+                command         => "/usr/bin/aws s3 cp $audit_publickey_location /etc/linotp2/public.pem && /usr/bin/chmod 640 /etc/linotp2/public.pem &&  /usr/bin/chown root.apache /etc/linotp2/public.pem",
                 creates         => "/etc/linotp2/public.pem",
 		require         => Package['linotp_package_apache'],
         }
