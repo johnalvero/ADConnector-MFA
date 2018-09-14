@@ -161,6 +161,14 @@ curl -k 'https://localhost/validate/check?user=<username>&pass=<Token-From-Googl
 
 If this is not the output you see, go back and review the installation steps.
 ```
+#### Alternate method
+Another way to test the OTP is through a user portal with the following URL
+```
+https://<hostname>/auth/index
+```
+Where:
+  username = AD username
+  OTP PIN and OTP value = OTP from Google Authenticator
 
 ## Installing Freeradius and packages
 ```
