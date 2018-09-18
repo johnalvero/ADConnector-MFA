@@ -377,9 +377,15 @@ class linotp {
  		require 	=> Package['linotp_package'],
 	}
 
+        package { 'awscli':
+                ensure          => present,
+                allow_virtual   => false,
+        }
+	
 	exec { 'encKey':
 		command 	=> "/usr/bin/aws s3 cp $token_enckey_location /etc/linotp2/encKey && /usr/bin/chmod 640 /etc/linotp2/encKey &&  /usr/bin/chown linotp.root /etc/linotp2/encKey",
 		creates 	=> "/etc/linotp2/encKey",
+		require         => Package['awscli'],
 	}
 	
 	# Realm is hard-coded for now because its also hard-coded in the apache config
