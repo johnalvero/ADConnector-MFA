@@ -197,6 +197,134 @@ post-auth {
 END
 
 
+$http_ssl_linotp = @(END)
+WSGISocketPrefix run/wsgi
+
+Listen 443
+SSLPassPhraseDialog  builtin
+SSLSessionCache         shmcb:/var/cache/mod_ssl/scache(512000)
+SSLSessionCacheTimeout  300
+SSLRandomSeed startup file:/dev/urandom  256
+SSLRandomSeed connect builtin
+SSLCryptoDevice builtin
+
+<VirtualHost _default_:443>
+    ServerAdmin webmaster@localhost
+
+#    Include /etc/linotp2/apache-servername.conf
+
+    Header always edit Set-Cookie ^(.*)$ $1;secure
+
+    <Directory />
+        AllowOverride None
+        Require all denied
+    </Directory>
+
+    <Directory /etc/linotp2>
+        <Files linotpapp.wsgi>
+           Require all granted
+        </Files>
+    </Directory>
+
+    <Directory /usr/share/doc/linotpdoc/html>
+        Require all granted
+    </Directory>
+
+    Alias /doc/html         /usr/share/doc/linotpdoc/html
+
+    WSGIScriptAlias /       /etc/linotp2/linotpapp.wsgi
+    #
+    # The daemon is running as user 'linotp'
+    # This user should have access to the encKey database encryption file
+    WSGIDaemonProcess linotp processes=1 threads=15 display-name=%{GROUP} user=linotp
+    WSGIProcessGroup linotp
+    WSGIPassAuthorization On
+
+
+    <LocationMatch /ocra/(request|checkstatus|getActivationCode|calculateOtp)>
+        AuthType Digest
+        AuthName "LinOTP2 admin area"
+        AuthDigestProvider file
+        AuthUserFile /etc/linotp2/admins
+        Require valid-user
+    </LocationMatch>
+
+
+    <LocationMatch /(audit|manage|system|license|admin)>
+        AuthType Digest
+        AuthName "LinOTP2 admin area"
+        AuthDigestProvider file
+        AuthUserFile /etc/linotp2/admins
+        Require valid-user
+        #----------------------------------------
+        # Here we do client certificate auth
+        #----------------------------------------
+        # SSLVerifyClient require
+        # SSLVerifyDepth  2
+        # # Who signed the client certificates
+        # SSLCACertificateFile /etc/ssl/certs/ca.crt
+        # # what client certs are allowed to log in?
+        # SSLRequire ( %{SSL_CLIENT_S_DN_OU} eq "az" and %{SSL_CLIENT_S_DN_CN} in {"linotpadm", "Manfred Mann"} )
+    </LocationMatch>
+
+    <Location /gettoken>
+        AuthType Digest
+        AuthName "LinOTP2 gettoken"
+        AuthDigestProvider file
+        AuthUserFile /etc/linotp2/gettoken-api
+        Require valid-user
+    </Location>
+
+    <Location /selfservice>
+        # The authentication for selfservice is done from within the application
+    </Location>
+
+    <Location /validate>
+        # No Authentication
+    </Location>
+
+
+    ErrorLog /var/log/httpd/error_log
+
+    LogLevel warn
+
+    # Do not use %q! This will reveal all parameters, including setting PINs and Keys!
+    # Using SSL_CLINET_S_DN_CN will show you, which administrator did what task
+    LogFormat "%h %l %u %t %>s \"%m %U %H\"  %b \"%{Referer}i\" \"%{User-agent}i\" \"%{SSL_CLIENT_S_DN_CN}x\"" LinOTP2
+    CustomLog /var/log/httpd/ssl_access_log LinOTP2
+
+    #   SSL Engine Switch:
+    #   Enable/Disable SSL for this virtual host.
+    SSLEngine on
+
+    #   If both key and certificate are stored in the same file, only the
+    #   SSLCertificateFile directive is needed.
+SSLProtocol all -SSLv2
+
+SSLHonorCipherOrder on
+SSLCipherSuite ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA:ECDHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA256:DHE-RSA-AES256-SHA:ECDHE-ECDSA-DES-CBC3-SHA:ECDHE-RSA-DES-CBC3-SHA:EDH-RSA-DES-CBC3-SHA:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:DES-CBC3-SHA:!DSS:!aNULL:!eNUL:!MD5:!RC4:!DES:!LOW:!EXP 
+
+SSLCertificateFile /etc/pki/tls/certs/localhost.crt
+SSLCertificateKeyFile /etc/pki/tls/private/localhost.key
+
+    <FilesMatch "\.(cgi|shtml|phtml|php)$">
+        SSLOptions +StdEnvVars
+    </FilesMatch>
+
+    <Directory /usr/lib/cgi-bin>
+        SSLOptions +StdEnvVars
+    </Directory>
+
+    BrowserMatch ".*MSIE.*" \
+        nokeepalive ssl-unclean-shutdown \
+        downgrade-1.0 force-response-1.0
+
+    ErrorDocument 500 "<h1>Internal Server Error</h1> Possible reasons can be missing modules or bad access rights on LinOTP configuration files or log files. Please check the apache logfile <pre>/var/log/httpd/error_log</pre> for more details."
+
+</VirtualHost>
+END
+
+
 class linotp {
 
 	exec { 'linotp_repo':
@@ -237,9 +365,9 @@ class linotp {
 
 	file { 'apache_linotp_config':
 		path  		=> '/etc/httpd/conf.d/ssl_linotp.conf',
-		ensure 		=> present,
+		ensure 		=> file,
 		require 	=> Package['linotp_package_apache'],
-		content 	=> file('/etc/httpd/conf.d/ssl_linotp.conf.template'),
+		content 	=> inline_epp($http_ssl_linotp),
 	}
 
 	file { 'linotp_ini':
