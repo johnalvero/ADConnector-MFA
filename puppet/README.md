@@ -15,8 +15,8 @@ aws s3 cp encKey s3://<bucket/<path>/encKey
 openssl genrsa -out private.pem 2048
 openssl rsa -in private.pem -pubout -out public.pem
 
-aws s3 cp encKey s3://<bucket/<path>/public.pem
-aws s3 cp encKey s3://<bucket/<path>/private.pem
+aws s3 cp public.pem s3://<bucket/<path>/public.pem
+aws s3 cp private.pem s3://<bucket/<path>/private.pem
 ```
 4. Open the file init.pp and setup the configurable parameters
 5. Make sure that the instance has a role or credentials to pull the encKey from the bucket
