@@ -25,3 +25,11 @@ aws s3 cp private.pem s3://<bucket/<path>/private.pem
 ```
 puppet apply init.pp --parser future
 ```
+
+
+Note: if radius does not start
+```
+install cpan
+cpanm Config::File
+check permission for (755) /usr/lib64/perl5/vendor_perl/Config
+```
