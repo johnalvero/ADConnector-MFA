@@ -1,6 +1,7 @@
 ## Assumptions
   - SELinux is disabled
   - OS IPtables is disabled
+  - NTP time is properly setup
   
 
 ## Puppet Instructions
