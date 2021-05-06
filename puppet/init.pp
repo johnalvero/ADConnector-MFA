@@ -1,26 +1,26 @@
-$token_enckey_location		= "s3://<bucket>/<path>/encKey"
+$token_enckey_location		= "s3://<bucket>/encKey_dev"
 $audit_privatekey_location      = "s3://<bucket>/private.pem"
 $audit_publickey_location       = "s3://<bucket>/public.pem"
-$db_host			= "localhost"
+$db_host			= ""
 $db_port			= "3306"
-$db_user			= "linotp"
-$db_pass			= "<DB-Password"
-$db_name			= "LINOTP"
-$admin_digest_user      	= "<admin-user>"
-$admin_digest_password  	= "<admin-password>"
-$realm				= "<realm>"
+$db_user			= ""
+$db_pass			= ""
+$db_name			= ""
+$admin_digest_user      	= ""
+$admin_digest_password  	= ""
+$realm				= ""
 
 $radius_clients = {
     'localhost' => {
         'ipaddr'  => '127.0.0.1',
         'netmask' => '32',
-        'secret'  => '<your-secret>',
+        'secret'  => '<secret>',
     },
 
     'adconnector' => {
         'ipaddr'  => '10.0.0.0',
         'netmask' => '16',
-        'secret'  => '<your-secret>',
+        'secret'  => '<secret>',
     },
 }
 
@@ -390,14 +390,20 @@ class linotp {
 	
 	# Realm is hard-coded for now because its also hard-coded in the apache config
 	$pwdigest  = "$admin_digest_user:LinOTP2 admin area:$admin_digest_password".md5
-    	$htcontent = "$admin_digest_user:LinOTP2 admin area:$pwdigest"
+    	#$htcontent = "$admin_digest_user:LinOTP2 admin area:$pwdigest"
 
-	file { 'htpasswd_admin':
-		path		=> "/etc/linotp2/admins",
-		content 	=> $htcontent,
-		mode		=> 0640,
-		owner		=> "linotp",
-		group		=> "apache",
+	#file { 'htpasswd_admin':
+	#	path		=> "/etc/linotp2/admins",
+	#	content 	=> $htcontent,
+	#	mode		=> 0640,
+	#	owner		=> "linotp",
+	#	group		=> "apache",
+	#}
+
+	exec { 'create_admin_users':
+		command		=> "/bin/echo -n $admin_digest_user:$realm:$admin_digest_password | /bin/md5sum | /bin/cut -f1 -d ' '",
+		creates		=> "/etc/linotp2/admins",
+		require		=> Package['linotp_package_apache'],
 	}
 
 	exec { 'audit_private':
