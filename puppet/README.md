@@ -4,13 +4,13 @@
   
 
 ## Puppet Instructions
-1. Create the database (RDS MySQL/Stand Alone EC2)
-2. Create the token encryption key and upload to S3
+1. Create the database (RDS MySQL/Stand Alone EC2). There is no need to create the table schema, LinOTP will create the tables automatically
+2. Create the token encryption key and upload to an S3 bucket
 ```
 dd if=/dev/urandom of=encKey bs=1 count=96
 aws s3 cp encKey s3://<bucket/<path>/encKey
 ```
-3. Create a keypair for audit signing
+3. Create a keypair for audit log signing
 ```
 openssl genrsa -out private.pem 2048
 openssl rsa -in private.pem -pubout -out public.pem
